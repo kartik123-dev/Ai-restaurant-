@@ -370,4 +370,12 @@ function calculateDemand(){
  }else{
   Object.entries(recipes).forEach(([name,items])=>Object.entries(items).forEach(([ingredient,q])=>totals[ingredient]=(totals[ingredient]||0)+q*demand));
  }
- const lines=Object.entries(totals).map(
+ 
+ const lines=Object.entries(totals).map(([name,qty])=>`${name}: ${qty.toFixed(2)}`).join("\n");
+ alert(lines ? "Estimated ingredient demand:\n"+lines : "No ingredients found. Check your recipes.");
+}
+  
+</script>
+</body>
+</html>
+
