@@ -1,4 +1,11 @@
-
+function predictSales(){
+ const c=Number(document.getElementById("customers").value);
+ const s=Number(document.getElementById("spend").value);
+ if(!Number.isFinite(c)||!Number.isFinite(s)||c<0||s<0){alert("Enter valid non-negative values.");return;}
+ const result=c*s;
+ document.getElementById("predictionAmount").textContent=money(result);
+ document.getElementById("predictionText").textContent="Demo estimate: "+c+" customers × "+money(s)+" average spend. This is not yet produced by the trained Python model.";
+ document.getElementById("expectedStat").textContent=money(resu
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -257,15 +264,54 @@ function showPage(page){
  if(page==="sales")renderSalesTable();
 }
 document.querySelectorAll(".nav").forEach(n=>n.addEventListener("click",()=>showPage(n.dataset.page)));
-function predictSales(){
- const c=Number(document.getElementById("customers").value);
- const s=Number(document.getElementById("spend").value);
- if(!Number.isFinite(c)||!Number.isFinite(s)||c<0||s<0){alert("Enter valid non-negative values.");return;}
- const result=c*s;
- document.getElementById("predictionAmount").textContent=money(result);
- document.getElementById("predictionText").textContent="Demo estimate: "+c+" customers × "+money(s)+" average spend. This is not yet produced by the trained Python model.";
- document.getElementById("expectedStat").textContent=money(result);
-}
+
+async function predictSales(){
+ const c = Number(document.getElementById("customers").value);
+ const s = Number(document.getElementById("spend").value);
+
+ if(!Number.isFinite(c) || !Number.isFinite(s) || c < 0 || s < 0){
+   alert("Enter valid non-negative values.");
+   return;
+ }
+
+ const amount = document.getElementById("predictionAmount");
+ const description = document.getElementById("predictionText");
+ const stat = document.getElementById("expectedStat");
+
+ amount.textContent = "Predicting...";
+ description.textContent = "Connecting to the Python AI model...";
+
+ try {
+   const response = await fetch("https://ai-restaurant-wvkp.onrender.com/predict", {
+     method: "POST",
+     headers: {"Content-Type": "application/json"},
+     body: JSON.stringify({customers: c})
+   });
+
+   const data = await response.json();
+
+   if(!response.ok) {
+     throw new Error(data.error || "Prediction failed");
+   }
+
+   const result = Number(data.predicted_sales);
+
+   amount.textContent = money(result);
+   description.textContent =
+     "Python AI prediction for " + c +
+     " customers: " + money(result) +
+     ". Your entered average spend is " + money(s) + ".";
+   stat.textContent = money(result);
+
+ } catch(error) {
+   amount.textContent = "Unavailable";
+   description.textContent =
+     "Could not connect to the Python model. Please try again shortly.";
+   console.error("Prediction error:", error);
+ }
+                  }
+  
+
 function quickPredict(){
  const c=Number(document.getElementById("quickCustomers").value);
  const s=Number(document.getElementById("quickSpend").value);
