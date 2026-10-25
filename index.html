@@ -1,0 +1,373 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Restaurant AI | Smart Management</title>
+<style>
+:root {
+  --bg:#f5f5ed; --card:#fffef9; --green:#173f35;
+  --green2:#246b54; --lime:#d9f078; --text:#1e3029;
+  --muted:#78847b; --border:#e4e8dc; --red:#c24e43;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+font-family:Inter,system-ui,Arial,sans-serif}
+.app{display:flex;min-height:100vh}
+.sidebar{width:235px;background:var(--green);color:white;
+padding:25px 17px;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;
+font-size:20px;margin:5px 8px 38px}
+.logo{background:var(--lime);color:var(--green);padding:9px;
+border-radius:12px}
+.navlabel{font-size:10px;letter-spacing:2px;color:#a6c1b3;
+margin:25px 12px 12px}
+.nav{padding:12px;border-radius:10px;color:#c9dbd0;
+margin:5px 0;cursor:pointer;font-size:14px}
+.nav.active,.nav:hover{background:#2c594a;color:white}
+.sidefoot{margin-top:50px;font-size:12px;color:#a6c1b3;
+line-height:1.8;padding:10px}
+.main{flex:1;min-width:0;padding:28px;max-width:1500px}
+.top{display:flex;justify-content:space-between;align-items:center;
+gap:12px;margin-bottom:28px}
+.eyebrow{color:var(--green2);font-size:11px;letter-spacing:2px;
+font-weight:800}
+h1{font-size:clamp(24px,4vw,34px);margin:7px 0}
+.subtitle{color:var(--muted);font-size:13px}
+.pill{background:#e3f3dd;color:#316a42;padding:9px 12px;
+border-radius:20px;font-size:12px;font-weight:700}
+h2{font-size:18px;margin:0 0 6px}
+.sectiondesc{font-size:12px;color:var(--muted);margin-bottom:20px}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+gap:15px;margin-bottom:24px}
+.card{background:var(--card);border:1px solid var(--border);
+border-radius:17px;padding:20px;min-width:0}
+.statlabel{font-size:12px;color:var(--muted)}
+.statvalue{font-size:clamp(21px,3vw,29px);font-weight:800;
+letter-spacing:-1px;margin:13px 0 8px}
+.statnote{font-size:11px;color:var(--green2)}
+.grid{display:grid;grid-template-columns:minmax(0,1.5fr)
+minmax(250px,1fr);gap:18px;margin-bottom:22px}
+.chart{height:220px;width:100%;display:block}
+.chartlabels{display:flex;justify-content:space-between;
+font-size:10px;color:var(--muted)}
+.panelhead{display:flex;justify-content:space-between;
+align-items:center;gap:8px;margin-bottom:20px}
+.tag{background:#edf0e5;border-radius:8px;padding:6px 9px;
+font-size:11px;color:var(--green)}
+label{display:block;font-size:12px;font-weight:700;margin:12px 0 6px}
+input,select{width:100%;padding:11px;border:1px solid var(--border);
+border-radius:9px;background:white;font:inherit;color:var(--text)}
+button{border:0;border-radius:10px;padding:11px 15px;
+background:var(--green);color:white;font-weight:700;
+cursor:pointer;font:inherit;font-size:12px}
+button:hover{background:var(--green2)}
+button.secondary{background:#e9eee4;color:var(--green)}
+button.danger{background:#fbe9e5;color:#9e3d32}
+.full{width:100%;margin-top:14px}
+.bigpred{background:var(--green);color:white;border-radius:17px;
+padding:22px;margin-top:18px}
+.bigpred .amount{font-size:32px;font-weight:800;margin:9px 0}
+.bigpred p{font-size:12px;color:#c5d8cc;line-height:1.6}
+.stockrow{display:flex;justify-content:space-between;gap:10px;
+padding:15px 0;border-bottom:1px solid var(--border);font-size:13px}
+.stockrow:last-child{border:0}
+.stockname{font-weight:750}
+.stockmeta{font-size:11px;color:var(--muted);margin-top:5px}
+.status{font-size:10px;font-weight:800;padding:6px 8px;
+border-radius:7px;height:max-content;white-space:nowrap}
+.ok{background:#e4f4df;color:#347043}
+.low{background:#fbe6df;color:#a23e31}
+.section{display:none}
+.section.active{display:block}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:13px 9px;border-bottom:1px solid var(--border)}
+th{color:var(--muted);font-weight:600}
+.tablewrap{overflow-x:auto}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}
+.notice{background:#f1f1df;padding:13px;border-radius:10px;
+font-size:12px;line-height:1.6;margin:15px 0;color:#586344}
+.empty{color:var(--muted);font-size:13px;padding:15px 0}
+@media(max-width:900px){
+.sidebar{width:190px}.main{padding:20px}.stats{grid-template-columns:repeat(2,1fr)}
+.grid{grid-template-columns:1fr}
+}
+@media(max-width:560px){
+.app{display:block}.sidebar{width:100%;padding:14px}
+.brand{margin:3px 5px 14px}.navlabel,.sidefoot{display:none}
+.navs{display:flex;gap:6px;overflow-x:auto}
+.nav{white-space:nowrap;padding:10px;font-size:12px}
+.main{padding:18px 13px}.top{align-items:flex-start}
+.stats{gap:9px}.card{padding:15px}.statvalue{font-size:23px}
+.formgrid{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="sidebar">
+  <div class="brand"><span class="logo">✳</span> Restaurant AI</div>
+  <div class="navlabel">WORKSPACE</div>
+  <div class="navs">
+    <div class="nav active" data-page="overview">◫ Overview</div>
+    <div class="nav" data-page="sales">↗ Sales prediction</div>
+    <div class="nav" data-page="inventory">▦ Inventory</div>
+    <div class="nav" data-page="recipes">♧ Recipes & menu</div>
+  </div>
+  <div class="sidefoot">SMART RESTAURANT<br>Sales intelligence · Stock control<br><br>Class XII AI Project</div>
+</aside>
+
+<main class="main">
+<header class="top">
+  <div><div class="eyebrow">RESTAURANT INTELLIGENCE</div>
+  <h1 id="pageTitle">Good day, Owner.</h1>
+  <div class="subtitle">Your restaurant, one smarter decision at a time.</div></div>
+  <div class="pill">● Demo mode</div>
+</header>
+
+<section class="section active" id="overview">
+<div class="stats">
+  <div class="card"><div class="statlabel">WEEKLY SALES</div>
+    <div class="statvalue" id="totalSales">₹45,800</div>
+    <div class="statnote">↗ 7 sample days</div></div>
+  <div class="card"><div class="statlabel">AVG. DAILY SALES</div>
+    <div class="statvalue" id="avgSales">₹6,543</div>
+    <div class="statnote">Based on demo records</div></div>
+  <div class="card"><div class="statlabel">EXPECTED SALES</div>
+    <div class="statvalue" id="expectedStat">₹7,000</div>
+    <div class="statnote">Prediction demo</div></div>
+  <div class="card"><div class="statlabel">RESTOCK ALERTS</div>
+    <div class="statvalue" id="alertCount">2</div>
+    <div class="statnote">Items need attention</div></div>
+</div>
+<div class="grid">
+  <div class="card">
+    <div class="panelhead"><div><h2>Sales overview</h2>
+      <div class="sectiondesc">Weekly revenue in rupees</div></div>
+      <span class="tag">7 DAYS</span></div>
+    <canvas class="chart" id="salesChart"></canvas>
+    <div class="chartlabels"><span>Mon</span><span>Tue</span><span>Wed</span>
+      <span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span></div>
+  </div>
+  <div class="card">
+    <div class="panelhead"><div><h2>Inventory health</h2>
+      <div class="sectiondesc">Live demo stock status</div></div></div>
+    <div id="overviewStock"></div>
+    <button class="secondary full" onclick="showPage('inventory')">Manage inventory →</button>
+  </div>
+</div>
+<div class="card">
+  <div class="panelhead"><div><h2>Quick sales forecast</h2>
+    <div class="sectiondesc">Enter the customers expected tomorrow</div></div></div>
+  <div class="formgrid">
+    <div><label>Expected customers</label><input id="quickCustomers" type="number" min="0" value="70"></div>
+    <div><label>Average spend (₹)</label><input id="quickSpend" type="number" min="0" value="100"></div>
+  </div>
+  <button class="full" onclick="quickPredict()">Calculate forecast →</button>
+  <div class="notice" id="quickResult">Demo estimate: ₹7,000. Connect the Python backend for model predictions.</div>
+</div>
+</section>
+
+<section class="section" id="sales">
+<div class="card">
+<h2>Sales prediction</h2><div class="sectiondesc">Estimate sales using the expected customer count.</div>
+<div class="formgrid">
+<div><label>Expected customers</label><input id="customers" type="number" min="0" value="70"></div>
+<div><label>Average spend per customer (₹)</label><input id="spend" type="number" min="0" value="100"></div>
+</div>
+<button class="full" onclick="predictSales()">Generate prediction →</button>
+<div class="bigpred"><div class="statlabel">ESTIMATED REVENUE</div>
+<div class="amount" id="predictionAmount">₹7,000</div>
+<div id="predictionText">Illustrative estimate based on customers × average spend. Python AI is not connected yet.</div></div>
+<div class="notice">Educational demo: this calculation is not the trained Python model. The Python API will be connected separately.</div>
+</div>
+<div class="card" style="margin-top:18px"><h2>Sample sales history</h2>
+<div class="tablewrap"><table><thead><tr><th>Day</th><th>Customers</th><th>Sales</th></tr></thead><tbody id="salesTable"></tbody></table></div>
+</div>
+</section>
+
+<section class="section" id="inventory">
+<div class="card">
+<div class="panelhead"><div><h2>Inventory management</h2>
+<div class="sectiondesc">Add ingredients, edit stock or remove items.</div></div></div>
+<div class="formgrid">
+<div><label>Ingredient name</label><input id="itemName" placeholder="e.g. Rice"></div>
+<div><label>Unit</label><select id="itemUnit"><option>kg</option><option>litres</option><option>pieces</option><option>grams</option><option>ml</option></select></div>
+<div><label>Available quantity</label><input id="itemQty" type="number" min="0" step="any" placeholder="e.g. 12"></div>
+<div><label>Minimum stock</label><input id="itemMin" type="number" min="0" step="any" placeholder="e.g. 3"></div>
+</div>
+<button class="full" onclick="saveItem()">＋ Add / update ingredient</button>
+<div class="notice">Stock data stays in this browser session's page state for now. A persistent database will be a separate backend step.</div>
+</div>
+<div class="card" style="margin-top:18px">
+<div class="panelhead"><div><h2>Current stock</h2><div class="sectiondesc">Stock and restocking recommendations</div></div></div>
+<div class="tablewrap"><table><thead><tr><th>Ingredient</th><th>Available</th><th>Minimum</th><th>Status</th><th>Action</th></tr></thead><tbody id="inventoryTable"></tbody></table></div>
+<div id="restockReport" class="notice"></div>
+</div>
+</section>
+
+<section class="section" id="recipes">
+<div class="card">
+<h2>Menu & recipe builder</h2>
+<div class="sectiondesc">Define ingredients needed for one serving of a dish.</div>
+<div class="formgrid">
+<div><label>Dish name</label><input id="dishName" placeholder="e.g. Sandwich"></div>
+<div><label>Ingredient</label><select id="recipeItem"></select></div>
+<div><label>Quantity per serving</label><input id="recipeQty" type="number" min="0" step="any" placeholder="e.g. 0.1"></div>
+<div><label>Expected servings</label><input id="dishDemand" type="number" min="0" value="20"></div>
+</div>
+<button class="full" onclick="addRecipe()">＋ Add ingredient to dish</button>
+</div>
+<div class="card" style="margin-top:18px">
+<div class="panelhead"><div><h2>Recipe book</h2><div class="sectiondesc">Saved in this page while open</div></div></div>
+<div id="recipeList"></div>
+</div>
+<div class="card" style="margin-top:18px">
+<h2>Ingredient demand calculator</h2>
+<div class="sectiondesc">Uses the saved recipes and your current stock.</div>
+<button onclick="calculateDemand()">Calculate required stock →</button>
+<div id="demandReport" style="margin-top:12px"></div>
+</div>
+</section>
+<footer class="subtitle" style="padding:24px 3px">Restaurant AI · Class XII AI Project · Sample data for demonstration</footer>
+</main>
+</div>
+
+<script>
+const days=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+const sales=[4500,5000,4800,6000,7500,9500,8500];
+const customerHistory=[45,50,48,60,75,95,85];
+let inventory=[
+{name:"Cheese",qty:10,unit:"kg",min:3},
+{name:"Flour",qty:20,unit:"kg",min:5},
+{name:"Tomato Sauce",qty:8,unit:"litres",min:2}
+];
+let recipes={
+"Pizza":{"Cheese":0.15,"Flour":0.25,"Tomato Sauce":0.10},
+"Burger":{"Cheese":0.05,"Flour":0.10,"Tomato Sauce":0.02}
+};
+function money(n){return "₹"+Number(n).toLocaleString("en-IN",{maximumFractionDigits:2});}
+function safe(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+function showPage(page){
+ document.querySelectorAll(".section").forEach(s=>s.classList.toggle("active",s.id===page));
+ document.querySelectorAll(".nav").forEach(n=>n.classList.toggle("active",n.dataset.page===page));
+ const titles={overview:"Good day, Owner.",sales:"Sales prediction",inventory:"Inventory control",recipes:"Recipes & menu"};
+ document.getElementById("pageTitle").textContent=titles[page]||"Restaurant AI";
+ if(page==="sales")renderSalesTable();
+}
+document.querySelectorAll(".nav").forEach(n=>n.addEventListener("click",()=>showPage(n.dataset.page)));
+function predictSales(){
+ const c=Number(document.getElementById("customers").value);
+ const s=Number(document.getElementById("spend").value);
+ if(!Number.isFinite(c)||!Number.isFinite(s)||c<0||s<0){alert("Enter valid non-negative values.");return;}
+ const result=c*s;
+ document.getElementById("predictionAmount").textContent=money(result);
+ document.getElementById("predictionText").textContent="Demo estimate: "+c+" customers × "+money(s)+" average spend. This is not yet produced by the trained Python model.";
+ document.getElementById("expectedStat").textContent=money(result);
+}
+function quickPredict(){
+ const c=Number(document.getElementById("quickCustomers").value);
+ const s=Number(document.getElementById("quickSpend").value);
+ if(c<0||s<0||!Number.isFinite(c)||!Number.isFinite(s)){alert("Enter valid numbers.");return;}
+ const r=c*s;
+ document.getElementById("quickResult").textContent="Demo estimate: "+money(r)+" ("+c+" customers × "+money(s)+"). Python model connection is pending.";
+ document.getElementById("expectedStat").textContent=money(r);
+}
+function renderSalesTable(){
+ document.getElementById("salesTable").innerHTML=days.map((d,i)=>`<tr><td>${d}</td><td>${customerHistory[i]}</td><td>${money(sales[i])}</td></tr>`).join("");
+}
+function drawChart(){
+ const canvas=document.getElementById("salesChart");
+ const rect=canvas.getBoundingClientRect();
+ if(!rect.width)return;
+ const dpr=window.devicePixelRatio||1;
+ canvas.width=rect.width*dpr;canvas.height=220*dpr;
+ const ctx=canvas.getContext("2d");ctx.scale(dpr,dpr);
+ const w=rect.width,h=220,pad=24,max=11000;
+ ctx.clearRect(0,0,w,h);
+ ctx.font="10px Arial";ctx.strokeStyle="#e5e9df";ctx.fillStyle="#849087";
+ for(let v=0;v<=10000;v+=2500){
+  const y=h-pad-(v/max)*(h-pad*1.7);
+  ctx.beginPath();ctx.moveTo(pad,y);ctx.lineTo(w-8,y);ctx.stroke();
+  ctx.fillText(v===0?"0":(v/1000)+"k",0,y-4);
+ }
+ const pts=sales.map((v,i)=>({x:pad+12+i*(w-pad-25)/6,y:h-pad-(v/max)*(h-pad*1.7)}));
+ ctx.beginPath();pts.forEach((p,i)=>i?ctx.lineTo(p.x,p.y):ctx.moveTo(p.x,p.y));
+ ctx.strokeStyle="#246b54";ctx.lineWidth=3;ctx.stroke();
+ pts.forEach(p=>{ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fillStyle="#d9f078";ctx.fill();ctx.strokeStyle="#246b54";ctx.lineWidth=2;ctx.stroke();});
+}
+function saveItem(){
+ const name=document.getElementById("itemName").value.trim();
+ const unit=document.getElementById("itemUnit").value;
+ const qty=Number(document.getElementById("itemQty").value);
+ const min=Number(document.getElementById("itemMin").value);
+ if(!name||document.getElementById("itemQty").value===""||document.getElementById("itemMin").value===""||!Number.isFinite(qty)||!Number.isFinite(min)||qty<0||min<0){alert("Fill all fields with valid non-negative quantities.");return;}
+ const old=inventory.find(x=>x.name.toLowerCase()===name.toLowerCase());
+ if(old){old.qty=qty;old.min=min;old.unit=unit;}
+ else inventory.push({name,qty,unit,min});
+ document.getElementById("itemName").value="";
+ document.getElementById("itemQty").value="";
+ document.getElementById("itemMin").value="";
+ renderInventory();renderRecipeItems();
+}
+function removeItem(name){
+ inventory=inventory.filter(x=>x.name!==name);
+ Object.keys(recipes).forEach(d=>delete recipes[d][name]);
+ renderInventory();renderRecipeItems();renderRecipes();
+}
+function renderInventory(){
+ const rows=inventory.map(x=>{
+ const isLow=x.qty<=x.min;
+ return `<tr><td>${safe(x.name)}</td><td>${x.qty} ${safe(x.unit)}</td><td>${x.min} ${safe(x.unit)}</td><td><span class="status ${isLow?"low":"ok"}">${isLow?"RESTOCK":"IN STOCK"}</span></td><td><button class="secondary" onclick="editItem('${safe(x.name).replace(/'/g,"&#39;")}')">Edit</button> <button class="danger" onclick="removeItem('${safe(x.name).replace(/'/g,"&#39;")}')">×</button></td></tr>`;
+ }).join("");
+ document.getElementById("inventoryTable").innerHTML=rows||'<tr><td colspan="5">No ingredients yet.</td></tr>';
+ const low=inventory.filter(x=>x.qty<=x.min);
+ document.getElementById("alertCount").textContent=low.length;
+ document.getElementById("overviewStock").innerHTML=inventory.slice(0,5).map(x=>`<div class="stockrow"><div><div class="stockname">${safe(x.name)}</div><div class="stockmeta">${x.qty} ${safe(x.unit)} available</div></div><span class="status ${x.qty<=x.min?"low":"ok"}">${x.qty<=x.min?"LOW STOCK":"HEALTHY"}</span></div>`).join("")||'<div class="empty">Add ingredients to get started.</div>';
+ document.getElementById("restockReport").innerHTML=low.length?"<b>Purchase list:</b><br>"+low.map(x=>safe(x.name)+": order at least "+Math.max(0,x.min-x.qty).toFixed(2)+" "+safe(x.unit)+" to reach minimum stock.").join("<br>"):"All ingredients are above their minimum stock level.";
+}
+function editItem(name){
+ const x=inventory.find(i=>i.name===name);if(!x)return;
+ document.getElementById("itemName").value=x.name;
+ document.getElementById("itemUnit").value=x.unit;
+ document.getElementById("itemQty").value=x.qty;
+ document.getElementById("itemMin").value=x.min;
+ showPage("inventory");
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+function renderRecipeItems(){
+ const select=document.getElementById("recipeItem");
+ const old=select.value;
+ select.innerHTML=inventory.map(x=>`<option value="${safe(x.name)}">${safe(x.name)} (${safe(x.unit)})</option>`).join("");
+ if(inventory.some(x=>x.name===old))select.value=old;
+}
+function addRecipe(){
+ const dish=document.getElementById("dishName").value.trim();
+ const item=document.getElementById("recipeItem").value;
+ const amount=Number(document.getElementById("recipeQty").value);
+ if(!dish||!item||document.getElementById("recipeQty").value===""||!Number.isFinite(amount)||amount<=0){alert("Enter a dish, ingredient and a quantity greater than zero.");return;}
+ if(!inventory.some(x=>x.name===item)){alert("Select an ingredient from inventory.");return;}
+ if(!recipes[dish])recipes[dish]={};
+ recipes[dish][item]=amount;
+ document.getElementById("dishName").value="";
+ document.getElementById("recipeQty").value="";
+ renderRecipes();
+}
+function renderRecipes(){
+ const el=document.getElementById("recipeList");
+ const entries=Object.entries(recipes);
+ el.innerHTML=entries.length?entries.map(([dish,items])=>`<div class="stockrow"><div><div class="stockname">${safe(dish)}</div><div class="stockmeta">${Object.entries(items).map(([name,q])=>safe(name)+": "+q+" "+safe((inventory.find(x=>x.name===name)||{}).unit||"unit")).join(" · ")||"No ingredients"}</div></div><button class="danger" onclick="deleteRecipe('${safe(dish).replace(/'/g,"&#39;")}')">Delete</button></div>`).join(""):'<div class="empty">No recipes yet. Add a dish above.</div>';
+}
+function deleteRecipe(dish){delete recipes[dish];renderRecipes();}
+function calculateDemand(){
+ const demand=Number(document.getElementById("dishDemand").value);
+ if(!Number.isFinite(demand)||demand<0){alert("Enter a valid non-negative serving count.");return;}
+ const totals={};
+ const dish=document.getElementById("dishName").value.trim();
+ if(dish&&recipes[dish]){
+  Object.entries(recipes[dish]).forEach(([name,q])=>totals[name]=(totals[name]||0)+q*demand);
+ }else{
+  Object.entries(recipes).forEach(([name,items])=>Object.entries(items).forEach(([ingredient,q])=>totals[ingredient]=(totals[ingredient]||0)+q*demand));
+ }
+ const lines=Object.entries(totals).map(
